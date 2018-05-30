@@ -157,7 +157,7 @@ ptspassthrough_err_t ptspassthrough_put_pts_on_buffer( ptspassthrough_t *h, int6
     if( !h || !dts || !pts )
         return PTSPASSTHROUGH_ERR_FUNCTION_PARAM;
 
-    ptspassthrough_log( h, PTSPASSTHROUGH_LOG_DEBUG, "Input(%u): DTS=%"PRId64", PTS=%"PRId64"\n", h->in_count, *dts, *pts );
+    ptspassthrough_log( h, PTSPASSTHROUGH_LOG_DEBUG, "Input(%"PRId64"): DTS=%"PRId64", PTS=%"PRId64"\n", h->in_count, *dts, *pts );
 
     h->pts_buffer[ h->in_count % h->num_pts_buffer ] = *pts;
 
@@ -210,9 +210,9 @@ ptspassthrough_err_t ptspassthrough_restore_pts_from_buffer( ptspassthrough_t *h
     }
 
     if( *pts < *dts )
-        ptspassthrough_log( h, PTSPASSTHROUGH_LOG_ERROR, "Output(%u): DTS=%"PRId64", PTS=%"PRId64" (invalid!)\n", h->out_count, *dts, *pts );
+        ptspassthrough_log( h, PTSPASSTHROUGH_LOG_ERROR, "Output(%"PRId64"): DTS=%"PRId64", PTS=%"PRId64" (invalid!)\n", h->out_count, *dts, *pts );
     else
-        ptspassthrough_log( h, PTSPASSTHROUGH_LOG_DEBUG, "Output(%u): DTS=%"PRId64", PTS=%"PRId64"\n", h->out_count, *dts, *pts );
+        ptspassthrough_log( h, PTSPASSTHROUGH_LOG_DEBUG, "Output(%"PRId64"): DTS=%"PRId64", PTS=%"PRId64"\n", h->out_count, *dts, *pts );
 
     ++ h->out_count;
     return PTSPASSTHROUGH_ERR_NONE;
