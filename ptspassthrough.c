@@ -157,6 +157,13 @@ ptspassthrough_err_t ptspassthrough_put_pts_on_buffer( ptspassthrough_t *h, int6
     if( !h || !dts || !pts )
         return PTSPASSTHROUGH_ERR_FUNCTION_PARAM;
 
+    if( h->in_count - h->out_count >= h->num_pts_buffer )
+    {
+        ptspassthrough_log( h, PTSPASSTHROUGH_LOG_DEBUG,
+                            "Need outputting already buffered PTS before inputting PTS due to lack of the size of the ring buffer.\n" );
+        return PTSPASSTHROUGH_ERR_MORE_OUTPUTS;
+    }
+
     ptspassthrough_log( h, PTSPASSTHROUGH_LOG_DEBUG, "Input(%"PRId64"): DTS=%"PRId64", PTS=%"PRId64"\n", h->in_count, *dts, *pts );
 
     h->pts_buffer[ h->in_count % h->num_pts_buffer ] = *pts;
@@ -179,6 +186,11 @@ ptspassthrough_err_t ptspassthrough_restore_pts_from_buffer( ptspassthrough_t *h
     if( index < 0 )
     {
         ptspassthrough_log( h, PTSPASSTHROUGH_LOG_FATAL, "index=%"PRId64" <- cfr_pts=%"PRId64" (invalid!)\n", index, cfr_pts );
+        return PTSPASSTHROUGH_ERR_INVALID_DATA;
+    }
+    if( h->in_count - index > h->num_pts_buffer )
+    {
+        ptspassthrough_log( h, PTSPASSTHROUGH_LOG_FATAL, "index=%"PRId64" <- cfr_pts=%"PRId64" -> already abandoned old PTS!\n", index, cfr_pts );
         return PTSPASSTHROUGH_ERR_INVALID_DATA;
     }
     *pts = h->pts_buffer[ index % h->num_pts_buffer ];
@@ -204,7 +216,7 @@ ptspassthrough_err_t ptspassthrough_restore_pts_from_buffer( ptspassthrough_t *h
         {
             ptspassthrough_log( h, PTSPASSTHROUGH_LOG_WARNING,
                                 "Apparently an output packet is emitted immediately but reordering might be still produced!\n"
-                                "Please buffer output packet(s) until a valid DTS is ready by inputting more PTS\n.");
+                                "Please buffer output packet(s) until a valid DTS is ready by inputting more PTS.\n");
             return PTSPASSTHROUGH_ERR_MORE_INPUTS;
         }
     }
